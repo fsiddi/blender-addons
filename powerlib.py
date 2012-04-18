@@ -142,7 +142,10 @@ class ToggleSubgroupRes(bpy.types.Operator):
             link=True) as (data_from, data_to):
                 data_to.groups.append(new_group)
 
-        obj.dupli_group = bpy.data.groups[new_group]
+        try: 
+            obj.dupli_group = bpy.data.groups[new_group]
+        except:
+            self.report({'WARNING'}, "Group %s not found" % new_group.upper())
 
         return {'FINISHED'}
 
