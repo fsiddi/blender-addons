@@ -51,6 +51,7 @@ class PowerlibPanel(bpy.types.Panel):
             group = ob.dupli_group
             group_name = group.name  # set variable for group toggle
             group_objs = bpy.data.groups[group.name].objects
+            total_groups = 0
 
             layout.label(" GROUP: " + group.name, icon = 'GROUP')
 
@@ -58,42 +59,53 @@ class PowerlibPanel(bpy.types.Panel):
 
             for elem in group_objs:
 
-                row = layout.row()
-                row.label(elem.name)
-                if (elem.dupli_type == 'GROUP'):
+                if elem.dupli_group != None:
 
-                    subgroup = row.operator("powerlib.toggle_subgroup",
-                    text="Visible", icon='RESTRICT_VIEW_OFF')
-                    subgroup.display = "NONE"
-                    subgroup.item_name = elem.name
-                    subgroup.group_name = group.name
+                    row = layout.row()
+                    row.label(elem.name)
+                    total_groups += 1
+                    
+                    if (elem.dupli_type == 'GROUP'):
+    
+                        subgroup = row.operator("powerlib.toggle_subgroup",
+                        text="Visible", icon='RESTRICT_VIEW_OFF')
+                        subgroup.display = "NONE"
+                        subgroup.item_name = elem.name
+                        subgroup.group_name = group.name
+                    else:
+                        subgroup = row.operator("powerlib.toggle_subgroup",
+                        text="Hidden", icon='RESTRICT_VIEW_ON')
+                        subgroup.display = "GROUP"
+                        subgroup.item_name = elem.name
+                        subgroup.group_name = group.name
+    
+                    resolution = str(elem.dupli_group.name)[-3:]
+                    if resolution in {'_hi', '_lo'}:
+                        res = resolution[-2:].upper()
+    
+                        subgroup = row.operator("powerlib.toggle_subgroup_res",
+                        text=res, icon='FILE_REFRESH')
+                        subgroup.item_name = elem.name
+                        subgroup.group_name = group.name
                 else:
-                    subgroup = row.operator("powerlib.toggle_subgroup",
-                    text="Hidden", icon='RESTRICT_VIEW_ON')
-                    subgroup.display = "GROUP"
-                    subgroup.item_name = elem.name
-                    subgroup.group_name = group.name
-
-                resolution = str(elem.dupli_group.name)[-3:]
-                if resolution in {'_hi', '_lo'}:
-                    res = resolution[-2:].upper()
-
-                    subgroup = row.operator("powerlib.toggle_subgroup_res",
-                    text=res, icon='FILE_REFRESH')
-                    subgroup.item_name = elem.name
-                    subgroup.group_name = group.name
-
-            row = layout.row(align=True)
-            group = row.operator("powerlib.toggle_group",
-            text="Show All", icon='RESTRICT_VIEW_OFF')
-            group.display = "showall"
-            group.group_name = group_name
-
-            group = row.operator("powerlib.toggle_group",
-            text="Hide All", icon='RESTRICT_VIEW_ON')
-            group.display = "hideall"
-            group.group_name = group_name
-
+                    pass   
+            
+            if total_groups == 0 :
+                row.label(" No subgroups found in this group",icon="LAYER_USED")
+            else:                                    
+                row = layout.row(align=True)
+                row.label("Total groups : " + str(total_groups))
+                row = layout.row(align=True)
+                group = row.operator("powerlib.toggle_group",
+                text="Show All", icon='RESTRICT_VIEW_OFF')
+                group.display = "showall"
+                group.group_name = group_name
+    
+                group = row.operator("powerlib.toggle_group",
+                text="Hide All", icon='RESTRICT_VIEW_ON')
+                group.display = "hideall"
+                group.group_name = group_name
+    
 
 def hello(self, n):
     print("a " + n)
