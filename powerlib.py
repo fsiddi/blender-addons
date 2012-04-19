@@ -55,13 +55,14 @@ class PowerlibPanel(bpy.types.Panel):
 
             layout.label(" GROUP: " + group.name, icon = 'GROUP')
 
-            row = layout.row()
+            box = layout.box()
 
             for elem in group_objs:
 
                 if elem.dupli_group != None:
 
-                    row = layout.row()
+                    
+                    row = box.row()
                     row.label(elem.name)
                     total_groups += 1
                     
