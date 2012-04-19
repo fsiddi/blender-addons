@@ -92,7 +92,7 @@ class PowerlibPanel(bpy.types.Panel):
                     pass   
             
             if total_groups == 0 :
-                row.label(" No subgroups found in this group",icon="LAYER_USED")
+                box.label(" No subgroups found in this group",icon="LAYER_USED")
             else:                                    
                 row = layout.row(align=True)
                 row.label("Total groups : " + str(total_groups))
@@ -107,7 +107,9 @@ class PowerlibPanel(bpy.types.Panel):
                 group.display = "hideall"
                 group.group_name = group_name
     
-
+        else:
+            layout.label(" Powerlib needs a group as active object")
+            
 def hello(self, n):
     print("a " + n)
 
