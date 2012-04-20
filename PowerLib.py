@@ -18,7 +18,7 @@
 
 bl_info = {
     "name": "Powerlib",
-    "description": "Control panel for managing"
+    "description": "Control panel for managing "
     "groups contained in linked libraries",
     "author": "Olivier Amrein, Francesco Siddi",
     "version": (0, 5),
@@ -60,14 +60,12 @@ class PowerlibPanel(bpy.types.Panel):
             for elem in group_objs:
 
                 if elem.dupli_group != None:
-
-                    
+                
                     row = box.row()
                     row.label(elem.name)
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
-    
                         subgroup = row.operator("powerlib.toggle_subgroup",
                         text="Visible", icon='RESTRICT_VIEW_OFF')
                         subgroup.display = "NONE"
@@ -126,9 +124,6 @@ class ToggleSubgroupRes(bpy.types.Operator):
         item_name = self.item_name
         obj = bpy.data.objects[item_name]
 
-        print(obj)
-
-        print("-- changing " + str(item_name) + " to ")
 
         dupgroup = obj.dupli_group
         dupgroup_name = obj.dupli_group.name
@@ -143,11 +138,6 @@ class ToggleSubgroupRes(bpy.types.Operator):
         else:
             new_group = dupgroup  # if error, do not change dupligroup
 
-        print ("dupligroup = " + str(dupgroup.name))
-        print ("extension = " + ext)
-        print ("root = " + root)
-        print ("new_group = " + new_group)
-
         if bpy.data.groups[dupgroup_name].library:
             # link needed object
             filepath = bpy.data.groups[dupgroup_name].library.filepath
@@ -159,6 +149,7 @@ class ToggleSubgroupRes(bpy.types.Operator):
 
         try: 
             obj.dupli_group = bpy.data.groups[new_group]
+            print("PowerLib: CHANGE " + str(item_name) + " to " + new_group)
         except:
             self.report({'WARNING'}, "Group %s not found" % new_group.upper())
 
@@ -170,7 +161,6 @@ class ToggleGroupOperator(bpy.types.Operator):
     bl_label = "Powerlib Toggle Group"
     display = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
-    #objects = bpy.props.CollectionProperty()
 
     def execute(self, context):
 
@@ -212,13 +202,7 @@ class ToggleSubgroupOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class LoadLibrarySubgroup(bpy.types.Operator):
-    bl_idname = "powerlib.load_library_group"
-    bl_label = "Load Library Subgroup"
-
-
 def register():
-    bpy.utils.register_class(LoadLibrarySubgroup)
     bpy.utils.register_class(ToggleSubgroupRes)
     bpy.utils.register_class(ToggleGroupOperator)
     bpy.utils.register_class(ToggleSubgroupOperator)
@@ -226,7 +210,6 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_class(LoadLibrarySubgroup)
     bpy.utils.unregister_class(ToggleSubgroupRes)
     bpy.utils.unregister_class(ToggleGroupOperator)
     bpy.utils.unregister_class(ToggleSubgroupOperator)
