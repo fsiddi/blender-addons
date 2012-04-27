@@ -92,7 +92,7 @@ class PowerlibPanel(bpy.types.Panel):
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
                 resolution = str(object.dupli_group.name)[-3:]
-                if resolution in {'_hi', '_lo'}:
+                if resolution in {'_hi', '_lo', '_me'}:
 
                     res = resolution[-2:].upper()
 
@@ -135,17 +135,30 @@ class ToggleSubgroupRes(bpy.types.Operator):
         dupgroup = obj.dupli_group
         dupgroup_name = obj.dupli_group.name
 
+
+
+
         root = dupgroup_name[:-2]
         ext = dupgroup_name[-2:]
-        if ext == 'hi':
-            new_group = root + "lo"
-        #elif ext == 'me':
-            #new_group = root + "lo"
-        elif ext == 'lo':
-            new_group = root + "hi"
+        
+        if (root + 'me') in bpy.data.groups:
+            if ext == 'hi':
+                new_group = root + "me"
+            elif ext == 'me':
+                new_group = root + "lo"
+            elif ext == 'lo':
+                new_group = root + "hi"
 
+            else:
+                new_group = dupgroup  # if error, do not change dupligroup
         else:
-            new_group = dupgroup  # if error, do not change dupligroup
+            if ext == 'hi':
+                new_group = root + "lo"
+            elif ext == 'lo':
+                new_group = root + "hi"
+
+            else:
+                new_group = dupgroup  # if error, do not change dupligroup
 
         if bpy.data.groups[dupgroup_name].library:
             # link needed object
