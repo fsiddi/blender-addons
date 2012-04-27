@@ -79,7 +79,7 @@ class PowerlibPanel(bpy.types.Panel):
                         subgroup.group_name = group.name
     
                     resolution = str(elem.dupli_group.name)[-3:]
-                    if resolution in {'_hi', '_lo'}:
+                    if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
     
                         subgroup = row.operator("powerlib.toggle_subgroup_res",
@@ -90,14 +90,13 @@ class PowerlibPanel(bpy.types.Panel):
                     pass   
             
             if total_groups == 0 :
-                box.label(" No subgroups found in this group",icon="LAYER_USED")
+                layout.label(" No subgroups found in this group",icon="LAYER_USED")
                 resolution = str(object.dupli_group.name)[-3:]
                 if resolution in {'_hi', '_lo', '_me'}:
 
                     res = resolution[-2:].upper()
 
-                    row = box.row()
-                    subgroup = row.operator("powerlib.toggle_subgroup_res",
+                    subgroup = box.operator("powerlib.toggle_subgroup_res",
                     text=res, icon='FILE_REFRESH')
                     subgroup.item_name = bpy.context.active_object.name
                     subgroup.group_name = group.name
