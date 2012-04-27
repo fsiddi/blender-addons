@@ -91,7 +91,18 @@ class PowerlibPanel(bpy.types.Panel):
             
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
-            else:                                    
+                resolution = str(object.dupli_group.name)[-3:]
+                if resolution in {'_hi', '_lo'}:
+
+                    res = resolution[-2:].upper()
+
+                    row = box.row()
+                    subgroup = row.operator("powerlib.toggle_subgroup_res",
+                    text=res, icon='FILE_REFRESH')
+                    subgroup.item_name = bpy.context.active_object.name
+                    subgroup.group_name = group.name
+
+            else:
                 row = layout.row(align=True)
                 row.label("Total groups : " + str(total_groups))
                 row = layout.row(align=True)
@@ -106,11 +117,7 @@ class PowerlibPanel(bpy.types.Panel):
                 group.group_name = group_name
     
         else:
-            layout.label(" Powerlib needs a group as active object")
-            
-def hello(self, n):
-    print("a " + n)
-
+            layout.label(" Powerlib needs a group as active object")            
 
 class ToggleSubgroupRes(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup_res"
@@ -122,8 +129,8 @@ class ToggleSubgroupRes(bpy.types.Operator):
 
         group_name = self.group_name
         item_name = self.item_name
-        obj = bpy.data.objects[item_name]
 
+        obj = bpy.data.objects[item_name]
 
         dupgroup = obj.dupli_group
         dupgroup_name = obj.dupli_group.name
@@ -132,6 +139,8 @@ class ToggleSubgroupRes(bpy.types.Operator):
         ext = dupgroup_name[-2:]
         if ext == 'hi':
             new_group = root + "lo"
+        #elif ext == 'me':
+            #new_group = root + "lo"
         elif ext == 'lo':
             new_group = root + "hi"
 
