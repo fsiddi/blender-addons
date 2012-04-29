@@ -104,6 +104,7 @@ class PowerlibPanel(bpy.types.Panel):
             else:
                 row = layout.row(align=True)
                 row.label("Total groups : " + str(total_groups))
+
                 row = layout.row(align=True)
                 group = row.operator("powerlib.toggle_group",
                 text="Show All", icon='RESTRICT_VIEW_OFF')
@@ -114,9 +115,31 @@ class PowerlibPanel(bpy.types.Panel):
                 text="Hide All", icon='RESTRICT_VIEW_ON')
                 group.display = "hideall"
                 group.group_name = group_name
-    
+
+                row = layout.row()
+                
+                row.label(text="Set all subgroups to : ")
+
+                row = layout.row(align=True)
+
+                group = row.operator("powerlib.toggle_group",
+                text="Low", icon='MESH_CIRCLE')
+                group.display = "low"
+                group.group_name = group_name
+                
+                group = row.operator("powerlib.toggle_group",
+                text="Medium", icon='MESH_UVSPHERE')
+                group.display = "medium"
+                group.group_name = group_name
+                
+                group = row.operator("powerlib.toggle_group",
+                text="High", icon='MESH_ICOSPHERE')
+                group.display = "high"
+                group.group_name = group_name
+                        
         else:
             layout.label(" Powerlib needs a group as active object")            
+
 
 class ToggleSubgroupRes(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup_res"
@@ -133,9 +156,6 @@ class ToggleSubgroupRes(bpy.types.Operator):
 
         dupgroup = obj.dupli_group
         dupgroup_name = obj.dupli_group.name
-
-
-
 
         root = dupgroup_name[:-2]
         ext = dupgroup_name[-2:]
@@ -192,14 +212,43 @@ class ToggleGroupOperator(bpy.types.Operator):
         for elem in group_objs:
             if display == 'showall':
                 elem.dupli_type = "GROUP"
-                print("Powerlib: SHOW " + elem.name)
+                #print("Powerlib: SHOW " + elem.name)
             elif display == 'hideall':
                 elem.dupli_type = "NONE"
-                print("Powerlib: HIDE " + elem.name)
+                #print("Powerlib: HIDE " + elem.name)
+            if display == 'low':
+                #print("Powerlib: ALL LOW " + elem.name)
+                SetProxyResolution(elem,'_lo')
+            elif display == 'medium':
+                #print("Powerlib: ALL MEDIUM " + elem.name)
+                SetProxyResolution(elem,'_me')
+            elif display == 'high':
+                #print("Powerlib: ALL HIGH " + elem.name)
+                SetProxyResolution(elem,'_hi')
             else:
                 print("nothing")
 
         return {'FINISHED'}
+
+def SetProxyResolution(elem,target_resolution):
+    
+    obj = bpy.data.objects[elem.name]
+    
+    try: 
+       dupgroup_name = obj.dupli_group.name
+    except : 
+        return
+    
+    root = dupgroup_name[:-3]
+    ext = dupgroup_name[-3:]
+    new_group = root + target_resolution
+    
+    if ext in {'_hi', '_lo', '_me'}:       
+        try: 
+            obj.dupli_group = bpy.data.groups[new_group]
+            #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
+        except:
+            print ("Group %s not found" % new_group.upper())
 
 
 class ToggleSubgroupOperator(bpy.types.Operator):
