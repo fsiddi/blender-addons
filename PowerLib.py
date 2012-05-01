@@ -87,40 +87,72 @@ class PowerlibPanel(bpy.types.Panel):
             
             box = layout.box()
 
+            split = box.split()
+            cols = []
+            for x in range(4):
+                cols.append(split.column())
+
             for elem in group_objs:
 
                 if elem.dupli_group != None:
-                
-                    row = box.row()
-                    row.label(elem.name)
+
+                    cols[0].label(text=elem.name)
+
+                    #row = box.row()
+                    #row.label(elem.name)
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
                         if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
+                            row = cols[1].row()
+                            row.enabled = False
                             subgroup = row.operator("powerlib.view_subgroup_content",
                             text="Explore", icon='GROUP')
                             subgroup.item_name = elem.name
-                        
-                        subgroup = row.operator("powerlib.toggle_subgroup",
+
+                            #subgroup = row.operator("powerlib.view_subgroup_content",
+                            #text="Explore", icon='GROUP')
+                            #subgroup.item_name = elem.name
+                        else:
+                            cols[1].separator()
+
+                        subgroup = cols[2].operator("powerlib.toggle_subgroup",
                         text="Visible", icon='RESTRICT_VIEW_OFF')
                         subgroup.display = "NONE"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
+
+                        #subgroup = row.operator("powerlib.toggle_subgroup",
+                        #text="Visible", icon='RESTRICT_VIEW_OFF')
+                        #subgroup.display = "NONE"
+                        #subgroup.item_name = elem.name
+                        #subgroup.group_name = group.name
                     else:
-                        subgroup = row.operator("powerlib.toggle_subgroup",
+                        subgroup = cols[2].operator("powerlib.toggle_subgroup",
                         text="Hidden", icon='RESTRICT_VIEW_ON')
                         subgroup.display = "GROUP"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
-    
+
+                        #subgroup = row.operator("powerlib.toggle_subgroup",
+                        #text="Hidden", icon='RESTRICT_VIEW_ON')
+                        #subgroup.display = "GROUP"
+                        #subgroup.item_name = elem.name
+                        #subgroup.group_name = group.name
+
                     resolution = str(elem.dupli_group.name)[-3:]
                     if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
-    
-                        subgroup = row.operator("powerlib.toggle_subgroup_res",
+
+                        subgroup = cols[3].operator("powerlib.toggle_subgroup_res",
                         text=res, icon='FILE_REFRESH')
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
+
+                        #subgroup = row.operator("powerlib.toggle_subgroup_res",
+                        #text=res, icon='FILE_REFRESH')
+                        #subgroup.item_name = elem.name
+                        #subgroup.group_name = group.name
                 else:
                     pass   
             
