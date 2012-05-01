@@ -67,11 +67,7 @@ class PowerlibPanel(bpy.types.Panel):
         active_subgroup = scene.ActiveSubgroup
         
         if len(active_subgroup) > 0:
-            ob = bpy.data.objects[active_subgroup] #  change this
-            row = layout.row()
-            subgroup = row.operator("powerlib.view_subgroup_content",
-            text="Visible", icon='PLUS')
-            subgroup.item_name = ''
+            ob = bpy.data.objects[active_subgroup]
         else:
             ob = bpy.context.active_object
 
@@ -81,8 +77,14 @@ class PowerlibPanel(bpy.types.Panel):
             group_objs = bpy.data.groups[group.name].objects
             total_groups = 0
 
-            layout.label(" GROUP: " + group.name, icon = 'GROUP')
-
+            row = layout.row()
+            row.label(" GROUP: " + group.name, icon = 'GROUP')
+            active_subgroup = scene.ActiveSubgroup
+            if len(active_subgroup) > 0:
+                subgroup = row.operator("powerlib.view_subgroup_content",
+                text="Back to subgroup", icon='BACK')
+                subgroup.item_name = ''
+            
             box = layout.box()
 
             for elem in group_objs:
@@ -94,9 +96,10 @@ class PowerlibPanel(bpy.types.Panel):
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
-                        subgroup = row.operator("powerlib.view_subgroup_content",
-                        text="Explore", icon='GROUP')
-                        subgroup.item_name = elem.name
+                        if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
+                            subgroup = row.operator("powerlib.view_subgroup_content",
+                            text="Explore", icon='GROUP')
+                            subgroup.item_name = elem.name
                         
                         subgroup = row.operator("powerlib.toggle_subgroup",
                         text="Visible", icon='RESTRICT_VIEW_OFF')
@@ -169,7 +172,7 @@ class PowerlibPanel(bpy.types.Panel):
                 group.group_name = group_name
                         
         else:
-            layout.label(" Powerlib needs a group as active object")            
+            layout.label(" Select a group")            
 
 
 class ToggleSubgroupResolution(bpy.types.Operator):
