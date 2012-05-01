@@ -63,8 +63,17 @@ class PowerlibPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         object = bpy.context.active_object
-
-        ob = bpy.context.active_object
+        scene = context.scene
+        active_subgroup = scene.ActiveSubgroup
+        
+        if len(active_subgroup) > 0:
+            ob = bpy.data.objects[active_subgroup] #  change this
+            row = layout.row()
+            subgroup = row.operator("powerlib.view_subgroup_content",
+            text="Visible", icon='PLUS')
+            subgroup.item_name = ''
+        else:
+            ob = bpy.context.active_object
 
         if ob.dupli_type == 'GROUP':
             group = ob.dupli_group
@@ -85,6 +94,10 @@ class PowerlibPanel(bpy.types.Panel):
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
+                        subgroup = row.operator("powerlib.view_subgroup_content",
+                        text="Explore", icon='GROUP')
+                        subgroup.item_name = elem.name
+                        
                         subgroup = row.operator("powerlib.toggle_subgroup",
                         text="Visible", icon='RESTRICT_VIEW_OFF')
                         subgroup.display = "NONE"
@@ -119,7 +132,6 @@ class PowerlibPanel(bpy.types.Panel):
                     text=res, icon='FILE_REFRESH')
                     subgroup.item_name = bpy.context.active_object.name
                     subgroup.group_name = group.name
-
             else:
                 row = layout.row(align=True)
                 row.label("Total groups : " + str(total_groups))
@@ -252,7 +264,7 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
     display = bpy.props.StringProperty()
     item_name = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
-
+    
     def execute(self, context):
 
         display = self.display
@@ -265,14 +277,29 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
 
         bpy.data.groups[grp_name].objects[obj_name].dupli_type = display
         return {'FINISHED'}
-
+class ViewSubgroupContent(bpy.types.Operator):
+    bl_idname = "powerlib.view_subgroup_content"
+    bl_label = "Blea"
+    item_name = bpy.props.StringProperty()
+    
+    def execute(self, context):
+        scene = context.scene
+        scene.ActiveSubgroup = self.item_name
+        return {'FINISHED'}
 
 def register():
+    bpy.types.Scene.ActiveSubgroup = StringProperty(
+            name="Commit untracked",
+            default="",
+            description="Add untracked files into svn and commit all of them")
+    bpy.utils.register_class(ViewSubgroupContent)
     bpy.utils.register_class(ToggleSubgroupResolution)
     bpy.utils.register_class(ToggleAllSubgroups)
     bpy.utils.register_class(ToggleSubgroupDisplay)
     bpy.utils.register_class(PowerlibPanel)
 def unregister():
+    del bpy.types.Scene.ActiveSubgroup
+    bpy.utils.unregister_class(ViewSubgroupContent)
     bpy.utils.unregister_class(ToggleSubgroupResolution)
     bpy.utils.unregister_class(ToggleAllSubgroups)
     bpy.utils.unregister_class(ToggleSubgroupDisplay)
