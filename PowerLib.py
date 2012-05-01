@@ -33,7 +33,26 @@ import bpy
 from bpy.props import (FloatProperty, BoolProperty, 
 FloatVectorProperty, StringProperty, EnumProperty)
 
+#  Generic function to toggle across 3 different model resolutions
+def SetProxyResolution(elem,target_resolution):
 
+    obj = bpy.data.objects[elem.name]
+
+    try: 
+       dupgroup_name = obj.dupli_group.name
+    except: 
+        return
+    
+    root = dupgroup_name[:-3]
+    ext = dupgroup_name[-3:]
+    new_group = root + target_resolution
+
+    if ext in {'_hi', '_lo', '_me'}:
+        try: 
+            obj.dupli_group = bpy.data.groups[new_group]
+            #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
+        except:
+            print ("Group %s not found" % new_group.upper())
 class PowerlibPanel(bpy.types.Panel):
     bl_label = "Powerlib"
     bl_idname = "SCENE_PT_powerlib"
@@ -141,7 +160,7 @@ class PowerlibPanel(bpy.types.Panel):
             layout.label(" Powerlib needs a group as active object")            
 
 
-class ToggleSubgroupRes(bpy.types.Operator):
+class ToggleSubgroupResolution(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup_res"
     bl_label = "Powerlib Toggle Soubgroup Res"
     item_name = bpy.props.StringProperty()
@@ -167,7 +186,6 @@ class ToggleSubgroupRes(bpy.types.Operator):
                 new_group = root + "lo"
             elif ext == 'lo':
                 new_group = root + "hi"
-
             else:
                 new_group = dupgroup  # if error, do not change dupligroup
         else:
@@ -175,7 +193,6 @@ class ToggleSubgroupRes(bpy.types.Operator):
                 new_group = root + "lo"
             elif ext == 'lo':
                 new_group = root + "hi"
-
             else:
                 new_group = dupgroup  # if error, do not change dupligroup
 
@@ -197,7 +214,7 @@ class ToggleSubgroupRes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ToggleGroupOperator(bpy.types.Operator):
+class ToggleAllSubgroups(bpy.types.Operator):
     bl_idname = "powerlib.toggle_group"
     bl_label = "Powerlib Toggle Group"
     display = bpy.props.StringProperty()
@@ -229,29 +246,7 @@ class ToggleGroupOperator(bpy.types.Operator):
                 print("nothing")
 
         return {'FINISHED'}
-
-def SetProxyResolution(elem,target_resolution):
-    
-    obj = bpy.data.objects[elem.name]
-    
-    try: 
-       dupgroup_name = obj.dupli_group.name
-    except : 
-        return
-    
-    root = dupgroup_name[:-3]
-    ext = dupgroup_name[-3:]
-    new_group = root + target_resolution
-    
-    if ext in {'_hi', '_lo', '_me'}:       
-        try: 
-            obj.dupli_group = bpy.data.groups[new_group]
-            #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
-        except:
-            print ("Group %s not found" % new_group.upper())
-
-
-class ToggleSubgroupOperator(bpy.types.Operator):
+class ToggleSubgroupDisplay(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup"
     bl_label = "Powelib Toggle Subgroup"
     display = bpy.props.StringProperty()
@@ -273,17 +268,14 @@ class ToggleSubgroupOperator(bpy.types.Operator):
 
 
 def register():
-    bpy.utils.register_class(ToggleSubgroupRes)
-    bpy.utils.register_class(ToggleGroupOperator)
-    bpy.utils.register_class(ToggleSubgroupOperator)
+    bpy.utils.register_class(ToggleSubgroupResolution)
+    bpy.utils.register_class(ToggleAllSubgroups)
+    bpy.utils.register_class(ToggleSubgroupDisplay)
     bpy.utils.register_class(PowerlibPanel)
-
-
 def unregister():
-    bpy.utils.unregister_class(ToggleSubgroupRes)
-    bpy.utils.unregister_class(ToggleGroupOperator)
-    bpy.utils.unregister_class(ToggleSubgroupOperator)
+    bpy.utils.unregister_class(ToggleSubgroupResolution)
+    bpy.utils.unregister_class(ToggleAllSubgroups)
+    bpy.utils.unregister_class(ToggleSubgroupDisplay)
     bpy.utils.unregister_class(PowerlibPanel)
-
 if __name__ == "__main__":
     register()
