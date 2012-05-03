@@ -53,6 +53,8 @@ def SetProxyResolution(elem,target_resolution):
             #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
         except:
             print ("Group %s not found" % new_group.upper())
+            
+            
 class PowerlibPanel(bpy.types.Panel):
     bl_label = "Powerlib"
     bl_idname = "SCENE_PT_powerlib"
@@ -85,79 +87,56 @@ class PowerlibPanel(bpy.types.Panel):
                 text="Back to subgroup", icon='BACK')
                 subgroup.item_name = ''
             
-            box = layout.box()
-
-            split = box.split()
-            cols = []
-            for x in range(4):
-                cols.append(split.column())
+            box = layout.box()         
 
             for elem in group_objs:
 
                 if elem.dupli_group != None:
-
-                    cols[0].label(text=elem.name)
-
-                    #row = box.row()
-                    #row.label(elem.name)
+                    
+                    row = box.row()   
+                    col=row.split()
+                                     
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
-                        if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
-                            row = cols[1].row()
-                            row.enabled = False
-                            subgroup = row.operator("powerlib.view_subgroup_content",
-                            text="Explore", icon='GROUP')
-                            subgroup.item_name = elem.name
 
-                            #subgroup = row.operator("powerlib.view_subgroup_content",
-                            #text="Explore", icon='GROUP')
-                            #subgroup.item_name = elem.name
-                        else:
-                            cols[1].separator()
-
-                        subgroup = cols[2].operator("powerlib.toggle_subgroup",
-                        text="Visible", icon='RESTRICT_VIEW_OFF')
+                        subgroup = col.operator("powerlib.toggle_subgroup",
+                        text=" "+elem.name, icon='RESTRICT_VIEW_OFF', emboss=False)
                         subgroup.display = "NONE"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
 
-                        #subgroup = row.operator("powerlib.toggle_subgroup",
-                        #text="Visible", icon='RESTRICT_VIEW_OFF')
-                        #subgroup.display = "NONE"
-                        #subgroup.item_name = elem.name
-                        #subgroup.group_name = group.name
                     else:
-                        subgroup = cols[2].operator("powerlib.toggle_subgroup",
-                        text="Hidden", icon='RESTRICT_VIEW_ON')
+                        subgroup = col.operator("powerlib.toggle_subgroup",
+                        text=" "+elem.name, icon='RESTRICT_VIEW_ON', emboss=False)
                         subgroup.display = "GROUP"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
 
-                        #subgroup = row.operator("powerlib.toggle_subgroup",
-                        #text="Hidden", icon='RESTRICT_VIEW_ON')
-                        #subgroup.display = "GROUP"
-                        #subgroup.item_name = elem.name
-                        #subgroup.group_name = group.name
+                    if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
 
+                        subgroup = col.operator("powerlib.view_subgroup_content",
+                        text="Explore", icon='GROUP')
+                        subgroup.item_name = elem.name
+                    else:
+                        col.label(text="")
+                       
                     resolution = str(elem.dupli_group.name)[-3:]
                     if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
 
-                        subgroup = cols[3].operator("powerlib.toggle_subgroup_res",
+                        subgroup = col.operator("powerlib.toggle_subgroup_res",
                         text=res, icon='FILE_REFRESH')
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
+                    else:
+                        col.separator()
 
-                        #subgroup = row.operator("powerlib.toggle_subgroup_res",
-                        #text=res, icon='FILE_REFRESH')
-                        #subgroup.item_name = elem.name
-                        #subgroup.group_name = group.name
                 else:
                     pass   
             
             if total_groups == 0 :
-                layout.label(" No subgroups found in this group",icon="LAYER_USED")
+                box.label(" No subgroups found in this group",icon="LAYER_USED")
                 resolution = str(object.dupli_group.name)[-3:]
                 if resolution in {'_hi', '_lo', '_me'}:
 
@@ -210,6 +189,7 @@ class PowerlibPanel(bpy.types.Panel):
 class ToggleSubgroupResolution(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup_res"
     bl_label = "Powerlib Toggle Soubgroup Res"
+    bl_description = "Change the resolution of a subgroup"
     item_name = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
 
@@ -264,6 +244,7 @@ class ToggleSubgroupResolution(bpy.types.Operator):
 class ToggleAllSubgroups(bpy.types.Operator):
     bl_idname = "powerlib.toggle_group"
     bl_label = "Powerlib Toggle Group"
+    bl_description = "Toggle a property for all subgroups"
     display = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
 
@@ -293,9 +274,12 @@ class ToggleAllSubgroups(bpy.types.Operator):
                 print("nothing")
 
         return {'FINISHED'}
+    
+    
 class ToggleSubgroupDisplay(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup"
     bl_label = "Powelib Toggle Subgroup"
+    bl_description = "Toggle the display of a subgroup"
     display = bpy.props.StringProperty()
     item_name = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
@@ -307,20 +291,23 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         grp_name = self.group_name
 
         print("Powerlib: " + obj_name + " is being set to " + display)
-        #print(obj_name)
-        #hello(context, display)
 
         bpy.data.groups[grp_name].objects[obj_name].dupli_type = display
         return {'FINISHED'}
+    
+    
 class ViewSubgroupContent(bpy.types.Operator):
     bl_idname = "powerlib.view_subgroup_content"
-    bl_label = "Blea"
+    bl_label = "Powerlib View Subgroup"
+    bl_description = "Display the content of a subgroup"
+
     item_name = bpy.props.StringProperty()
     
     def execute(self, context):
         scene = context.scene
         scene.ActiveSubgroup = self.item_name
         return {'FINISHED'}
+    
 
 def register():
     bpy.types.Scene.ActiveSubgroup = StringProperty(
@@ -332,6 +319,7 @@ def register():
     bpy.utils.register_class(ToggleAllSubgroups)
     bpy.utils.register_class(ToggleSubgroupDisplay)
     bpy.utils.register_class(PowerlibPanel)
+    
 def unregister():
     del bpy.types.Scene.ActiveSubgroup
     bpy.utils.unregister_class(ViewSubgroupContent)
@@ -339,5 +327,6 @@ def unregister():
     bpy.utils.unregister_class(ToggleAllSubgroups)
     bpy.utils.unregister_class(ToggleSubgroupDisplay)
     bpy.utils.unregister_class(PowerlibPanel)
+    
 if __name__ == "__main__":
     register()
