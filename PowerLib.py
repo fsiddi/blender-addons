@@ -92,29 +92,27 @@ class PowerlibPanel(bpy.types.Panel):
             for elem in group_objs:
 
                 if elem.dupli_group != None:
-                    
                     row = box.row()   
-                    col=row.split()
+                    col=row.row()
                                      
                     total_groups += 1
                     
                     if (elem.dupli_type == 'GROUP'):
-
                         subgroup = col.operator("powerlib.toggle_subgroup",
-                        text=" "+elem.name, icon='RESTRICT_VIEW_OFF', emboss=False)
+                        text="", icon='RESTRICT_VIEW_OFF', emboss=False)
                         subgroup.display = "NONE"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
-
+                        col.label(elem.name)
                     else:
                         subgroup = col.operator("powerlib.toggle_subgroup",
-                        text=" "+elem.name, icon='RESTRICT_VIEW_ON', emboss=False)
+                        text="", icon='RESTRICT_VIEW_ON', emboss=False)
                         subgroup.display = "GROUP"
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
-
+                        col.label(elem.name)
+                        
                     if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
-
                         subgroup = col.operator("powerlib.display_subgroup_content",
                         text="Explore", icon='GROUP')
                         subgroup.item_name = elem.name
@@ -131,10 +129,9 @@ class PowerlibPanel(bpy.types.Panel):
                         subgroup.group_name = group.name
                     else:
                         col.separator()
-
                 else:
                     pass   
-            
+        
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
                 resolution = str(object.dupli_group.name)[-3:]
