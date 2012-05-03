@@ -83,7 +83,7 @@ class PowerlibPanel(bpy.types.Panel):
             row.label(" GROUP: " + group.name, icon = 'GROUP')
             active_subgroup = scene.ActiveSubgroup
             if len(active_subgroup) > 0:
-                subgroup = row.operator("powerlib.view_subgroup_content",
+                subgroup = row.operator("powerlib.display_subgroup_content",
                 text="Back to subgroup", icon='BACK')
                 subgroup.item_name = ''
             
@@ -115,7 +115,7 @@ class PowerlibPanel(bpy.types.Panel):
 
                     if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
 
-                        subgroup = col.operator("powerlib.view_subgroup_content",
+                        subgroup = col.operator("powerlib.display_subgroup_content",
                         text="Explore", icon='GROUP')
                         subgroup.item_name = elem.name
                     else:
@@ -296,9 +296,9 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         return {'FINISHED'}
     
     
-class ViewSubgroupContent(bpy.types.Operator):
-    bl_idname = "powerlib.view_subgroup_content"
-    bl_label = "Powerlib View Subgroup"
+class DisplaySubgroupContent(bpy.types.Operator):
+    bl_idname = "powerlib.display_subgroup_content"
+    bl_label = "Powerlib Display Subgroup Content"
     bl_description = "Display the content of a subgroup"
 
     item_name = bpy.props.StringProperty()
@@ -314,7 +314,7 @@ def register():
             name="Commit untracked",
             default="",
             description="Add untracked files into svn and commit all of them")
-    bpy.utils.register_class(ViewSubgroupContent)
+    bpy.utils.register_class(DisplaySubgroupContent)
     bpy.utils.register_class(ToggleSubgroupResolution)
     bpy.utils.register_class(ToggleAllSubgroups)
     bpy.utils.register_class(ToggleSubgroupDisplay)
@@ -322,7 +322,7 @@ def register():
     
 def unregister():
     del bpy.types.Scene.ActiveSubgroup
-    bpy.utils.unregister_class(ViewSubgroupContent)
+    bpy.utils.unregister_class(DisplaySubgroupContent)
     bpy.utils.unregister_class(ToggleSubgroupResolution)
     bpy.utils.unregister_class(ToggleAllSubgroups)
     bpy.utils.unregister_class(ToggleSubgroupDisplay)
