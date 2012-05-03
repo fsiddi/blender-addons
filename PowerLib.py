@@ -128,7 +128,7 @@ class PowerlibPanel(bpy.types.Panel):
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
                     else:
-                        col.separator()
+                        col.label(text="")
                 else:
                     pass   
         
@@ -145,9 +145,9 @@ class PowerlibPanel(bpy.types.Panel):
                     subgroup.group_name = group.name
             else:
                 row = layout.row(align=True)
-                row.label("Total groups : " + str(total_groups))
-
-                row = layout.row(align=True)
+                row.label("Total groups: " + str(total_groups))
+                box = layout.box()
+                row = box.row(align=True)
                 group = row.operator("powerlib.toggle_group",
                 text="Show All", icon='RESTRICT_VIEW_OFF')
                 group.display = "showall"
@@ -158,11 +158,11 @@ class PowerlibPanel(bpy.types.Panel):
                 group.display = "hideall"
                 group.group_name = group_name
 
-                row = layout.row()
+                row = box.row()
                 
-                row.label(text="Set all subgroups to : ")
+                row.label(text="Set all subgroups to: ")
 
-                row = layout.row(align=True)
+                row = box.row(align=True)
 
                 group = row.operator("powerlib.toggle_group",
                 text="Low", icon='MESH_CIRCLE')
