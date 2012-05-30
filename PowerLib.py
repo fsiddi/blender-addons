@@ -33,6 +33,24 @@ import bpy
 from bpy.props import (FloatProperty, BoolProperty, 
 FloatVectorProperty, StringProperty, EnumProperty)
 
+#  Colors class for terminal terminal output
+class bcolors:
+    PINK = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
+
+    def disable(self):
+        self.PINK = ''
+        self.BLUE = ''
+        self.GREEN = ''
+        self.YELLOW = ''
+        self.RED = ''
+        self.ENDC = ''
+
+
 #  Generic function to toggle across 3 different model resolutions
 def SetProxyResolution(elem,target_resolution):
 
@@ -97,17 +115,17 @@ class PowerlibPanel(bpy.types.Panel):
                                      
                     total_groups += 1
                     
-                    if (elem.dupli_type == 'GROUP'):
+                    if (elem.hide == False):
                         subgroup = col.operator("powerlib.toggle_subgroup",
                         text="", icon='RESTRICT_VIEW_OFF', emboss=False)
-                        subgroup.display = "NONE"
+                        subgroup.display = True
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
                         col.label(elem.name)
                     else:
                         subgroup = col.operator("powerlib.toggle_subgroup",
                         text="", icon='RESTRICT_VIEW_ON', emboss=False)
-                        subgroup.display = "GROUP"
+                        subgroup.display = False
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
                         col.label(elem.name)
@@ -211,14 +229,14 @@ class ToggleSubgroupResolution(bpy.types.Operator):
             elif ext == 'lo':
                 new_group = root + "hi"
             else:
-                new_group = dupgroup  # if error, do not change dupligroup
+                new_group = dupgroup  #  if error, do not change dupligroup
         else:
             if ext == 'hi':
                 new_group = root + "lo"
             elif ext == 'lo':
                 new_group = root + "hi"
             else:
-                new_group = dupgroup  # if error, do not change dupligroup
+                new_group = dupgroup  #  if error, do not change dupligroup
 
         if bpy.data.groups[dupgroup_name].library:
             # link needed object
@@ -277,22 +295,30 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup"
     bl_label = "Powelib Toggle Subgroup"
     bl_description = "Toggle the display of a subgroup"
-    display = bpy.props.StringProperty()
+    display = bpy.props.BoolProperty()
     item_name = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
-    
+
     def execute(self, context):
 
         display = self.display
         obj_name = self.item_name
         grp_name = self.group_name
+        
+        status = '' #  only used for printing human readable output in console
+        if display == True:
+            status = 'hidden'
+        else:
+            status = 'visible'
 
-        print("Powerlib: " + obj_name + " is being set to " + display)
+        print("Powerlib: " + bcolors.GREEN + obj_name + bcolors.ENDC + 
+        " is now " + status)
+            
 
-        bpy.data.groups[grp_name].objects[obj_name].dupli_type = display
+        bpy.data.groups[grp_name].objects[obj_name].hide = display
         return {'FINISHED'}
-    
-    
+
+
 class DisplaySubgroupContent(bpy.types.Operator):
     bl_idname = "powerlib.display_subgroup_content"
     bl_label = "Powerlib Display Subgroup Content"
