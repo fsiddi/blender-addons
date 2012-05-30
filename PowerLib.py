@@ -305,12 +305,9 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         obj_name = self.item_name
         grp_name = self.group_name
         
-        status = '' #  only used for printing human readable output in console
-        if display == True:
-            status = 'hidden'
-        else:
-            status = 'visible'
-
+        #  only used for printing human readable output in console
+        status = "hidden" if display == True else "visible"
+         
         print("Powerlib: " + bcolors.GREEN + obj_name + bcolors.ENDC + 
         " is now " + status)
             
