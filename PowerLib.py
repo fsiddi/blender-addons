@@ -34,7 +34,7 @@ from bpy.props import (FloatProperty, BoolProperty,
 FloatVectorProperty, StringProperty, EnumProperty)
 
 #  Colors class for terminal terminal output
-class bcolors:
+class pcolor:
     BROWN = '\033[90m'
     PINK = '\033[95m'
     BLUE = '\033[94m'
@@ -55,7 +55,7 @@ class bcolors:
 
 #  Function for printing to terminal with Powerlib message at the beginning
 def PowerPrint (message):
-    print(bcolors.BROWN + "Powerlib: " + bcolors.ENDC + message)
+    print(pcolor.BROWN + "Powerlib: " + pcolor.ENDC + message)
     return
     
 #  Generic function to toggle across 3 different model resolutions
@@ -69,7 +69,7 @@ def SetProxyResolution(elem,target_resolution):
         return
     
     root = dupgroup_name[:-3]
-    ext = dupgroup_name[-3:].lower()
+    ext = dupgroup_name[-3:]
     new_group = root + target_resolution
 
     if ext in {'_hi', '_lo', '_me'}:
@@ -77,7 +77,7 @@ def SetProxyResolution(elem,target_resolution):
             obj.dupli_group = bpy.data.groups[new_group]
             #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
         except:
-            PowerPrint("Group %s not found" % new_group.upper())
+            PowerPrint("Group " + pcolor.GREEN + new_group + pcolor.ENDC + " not found")
             
             
 class PowerlibPanel(bpy.types.Panel):
@@ -144,7 +144,7 @@ class PowerlibPanel(bpy.types.Panel):
                     else:
                         col.label(text="")
                        
-                    resolution = str(elem.dupli_group.name)[-3:].lower()
+                    resolution = str(elem.dupli_group.name)[-3:]
                     if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
 
@@ -159,7 +159,7 @@ class PowerlibPanel(bpy.types.Panel):
         
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
-                resolution = str(object.dupli_group.name)[-3:].lower()
+                resolution = str(object.dupli_group.name)[-3:]
                 if resolution in {'_hi', '_lo', '_me'}:
 
                     res = resolution[-2:].upper()
@@ -297,8 +297,8 @@ class ToggleAllSubgroups(bpy.types.Operator):
                 #print("Powerlib: ALL HIGH " + elem.name)
                 SetProxyResolution(elem,'_hi')
             else:
-                PowerPrint(bcolors.GREEN + "level of detail "
-                "skipped" + bcolors.END)
+                PowerPrint(pcolor.GREEN + "level of detail "
+                "skipped" + pcolor.END)
 
         return {'FINISHED'}
     
@@ -320,7 +320,7 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         #  only used for printing human readable output in console
         status = "hidden" if display == True else "visible"
          
-        PowerPrint(bcolors.GREEN + obj_name + bcolors.ENDC + 
+        PowerPrint(pcolor.GREEN + obj_name + pcolor.ENDC + 
         " is now " + status)
             
 
