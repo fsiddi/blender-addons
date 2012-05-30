@@ -72,8 +72,8 @@ class PowerlibPanel(bpy.types.Panel):
             ob = bpy.data.objects[active_subgroup]
         else:
             ob = bpy.context.active_object
-
-        if ob.dupli_type == 'GROUP':
+            
+        if ob and ob.dupli_type == 'GROUP':
             group = ob.dupli_group
             group_name = group.name  # set variable for group toggle
             group_objs = bpy.data.groups[group.name].objects
