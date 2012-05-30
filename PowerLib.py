@@ -44,7 +44,7 @@ def SetProxyResolution(elem,target_resolution):
         return
     
     root = dupgroup_name[:-3]
-    ext = dupgroup_name[-3:]
+    ext = dupgroup_name[-3:].lower()
     new_group = root + target_resolution
 
     if ext in {'_hi', '_lo', '_me'}:
@@ -119,7 +119,7 @@ class PowerlibPanel(bpy.types.Panel):
                     else:
                         col.label(text="")
                        
-                    resolution = str(elem.dupli_group.name)[-3:]
+                    resolution = str(elem.dupli_group.name)[-3:].lower()
                     if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
 
@@ -134,7 +134,7 @@ class PowerlibPanel(bpy.types.Panel):
         
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
-                resolution = str(object.dupli_group.name)[-3:]
+                resolution = str(object.dupli_group.name)[-3:].lower()
                 if resolution in {'_hi', '_lo', '_me'}:
 
                     res = resolution[-2:].upper()
