@@ -279,15 +279,12 @@ class ToggleAllSubgroups(bpy.types.Operator):
         for elem in group_objs:
             if display == 'showall':
                 elem.hide = False
-                break
+                #break
                 #print("Powerlib: SHOW " + elem.name)
             elif display == 'hideall':
-                elem.hide = True
-                break
-            else:
-                pass
-                #print("Powerlib: HIDE " + elem.name)
-            if display == 'low':
+                elem.hide= True
+                #break
+            elif display == 'low':
                 #print("Powerlib: ALL LOW " + elem.name)
                 SetProxyResolution(elem,'_lo')
             elif display == 'medium':
