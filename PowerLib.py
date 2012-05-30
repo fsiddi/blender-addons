@@ -35,6 +35,7 @@ FloatVectorProperty, StringProperty, EnumProperty)
 
 #  Colors class for terminal terminal output
 class bcolors:
+    BROWN = '\033[90m'
     PINK = '\033[95m'
     BLUE = '\033[94m'
     GREEN = '\033[92m'
@@ -43,6 +44,7 @@ class bcolors:
     ENDC = '\033[0m'
 
     def disable(self):
+        self.BROWN = ''
         self.PINK = ''
         self.BLUE = ''
         self.GREEN = ''
@@ -51,6 +53,11 @@ class bcolors:
         self.ENDC = ''
 
 
+#  Function for printing to terminal with Powerlib message at the beginning
+def PowerPrint (message):
+    print(bcolors.BROWN + "Powerlib: " + bcolors.ENDC + message)
+    return
+    
 #  Generic function to toggle across 3 different model resolutions
 def SetProxyResolution(elem,target_resolution):
 
@@ -70,7 +77,7 @@ def SetProxyResolution(elem,target_resolution):
             obj.dupli_group = bpy.data.groups[new_group]
             #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
         except:
-            print ("Group %s not found" % new_group.upper())
+            PowerPrint("Group %s not found" % new_group.upper())
             
             
 class PowerlibPanel(bpy.types.Panel):
@@ -242,14 +249,14 @@ class ToggleSubgroupResolution(bpy.types.Operator):
             # link needed object
             filepath = bpy.data.groups[dupgroup_name].library.filepath
 
-            print(filepath)
+            PowerPrint(filepath)
             with bpy.data.libraries.load(filepath, 
             link=True) as (data_from, data_to):
                 data_to.groups.append(new_group)
 
         try: 
             obj.dupli_group = bpy.data.groups[new_group]
-            print("PowerLib: CHANGE " + str(item_name) + " to " + new_group)
+            PowerPrint("CHANGE " + str(item_name) + " to " + new_group)
         except:
             self.report({'WARNING'}, "Group %s not found" % new_group.upper())
 
@@ -271,10 +278,14 @@ class ToggleAllSubgroups(bpy.types.Operator):
 
         for elem in group_objs:
             if display == 'showall':
-                elem.dupli_type = "GROUP"
+                elem.hide = False
+                break
                 #print("Powerlib: SHOW " + elem.name)
             elif display == 'hideall':
-                elem.dupli_type = "NONE"
+                elem.hide = True
+                break
+            else:
+                pass
                 #print("Powerlib: HIDE " + elem.name)
             if display == 'low':
                 #print("Powerlib: ALL LOW " + elem.name)
@@ -286,7 +297,8 @@ class ToggleAllSubgroups(bpy.types.Operator):
                 #print("Powerlib: ALL HIGH " + elem.name)
                 SetProxyResolution(elem,'_hi')
             else:
-                print("nothing")
+                PowerPrint(bcolors.GREEN + "level of detail "
+                "skipped" + bcolors.END)
 
         return {'FINISHED'}
     
@@ -308,7 +320,7 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         #  only used for printing human readable output in console
         status = "hidden" if display == True else "visible"
          
-        print("Powerlib: " + bcolors.GREEN + obj_name + bcolors.ENDC + 
+        PowerPrint(bcolors.GREEN + obj_name + bcolors.ENDC + 
         " is now " + status)
             
 
