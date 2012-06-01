@@ -335,6 +335,7 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
             
 
         bpy.data.groups[grp_name].objects[obj_name].hide = display
+        bpy.data.groups[grp_name].objects[obj_name].hide_render = display
         return {'FINISHED'}
 
 
