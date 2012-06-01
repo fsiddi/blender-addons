@@ -33,6 +33,20 @@ import bpy
 from bpy.props import (FloatProperty, BoolProperty, 
 FloatVectorProperty, StringProperty, EnumProperty)
 
+#  Powerdict for storing statuses
+# def EnsurePowerDict():
+#    if bpy.context.scene["powerdict"]:
+#        pass
+#    else:
+#        bpy.context.scene["powerdict"] = {}
+
+#def PowerDictSet(object, resolution, visibility):
+#    powerdict[object] = [resolution, visibility]
+
+#  def PowerDictGet():
+#  def PowerDictSave(): probably not
+#  def PowerDictLoad():
+
 #  Colors class for terminal terminal output
 class pcolor:
     BROWN = '\033[90m'
@@ -115,7 +129,6 @@ class PowerlibPanel(bpy.types.Panel):
             box = layout.box()         
 
             for elem in group_objs:
-
                 if elem.dupli_group != None:
                     row = box.row()   
                     col=row.row()
