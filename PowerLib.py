@@ -152,7 +152,7 @@ class PowerlibPanel(bpy.types.Panel):
                         
                     if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
                         subgroup = col.operator("powerlib.display_subgroup_content",
-                        text="Explore", icon='GROUP')
+                        text="", icon='GROUP')
                         subgroup.item_name = elem.name
                     else:
                         col.label(text="")
