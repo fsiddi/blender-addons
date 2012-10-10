@@ -17,7 +17,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    "name": "Powerlib",
+    "name": "LodToggle",
     "description": "Control panel for managing "
     "groups contained in linked libraries",
     "author": "Olivier Amrein, Francesco Siddi",
@@ -32,6 +32,9 @@ bl_info = {
 import bpy
 from bpy.props import (FloatProperty, BoolProperty, 
 FloatVectorProperty, StringProperty, EnumProperty)
+
+
+scene = bpy.context.scene
 
 
 #  Colors class for terminal terminal output
@@ -54,9 +57,9 @@ class pcolor:
         self.ENDC = ''
 
 
-#  Function for printing to terminal with Powerlib message at the beginning
+#  Function for printing to terminal with LodToggle message at the beginning
 def PowerPrint (message):
-    print(pcolor.BROWN + "Powerlib: " + pcolor.ENDC + message)
+    print(pcolor.BROWN + "LodToggle: " + pcolor.ENDC + message)
     return
     
 #  Generic function to toggle across 3 different model resolutions
@@ -81,136 +84,47 @@ def SetProxyResolution(elem,target_resolution):
             PowerPrint("Group " + pcolor.GREEN + new_group + pcolor.ENDC + " not found")
             
             
-class PowerlibPanel(bpy.types.Panel):
-    bl_label = "Powerlib"
-    bl_idname = "SCENE_PT_powerlib"
+class LodTogglePanel(bpy.types.Panel):
+    bl_label = "LodToggle"
+    bl_idname = "SCENE_PT_lodtoggle"
     bl_context = "scene"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
 
     def draw(self, context):
         layout = self.layout
-        object = bpy.context.active_object
         scene = context.scene
-        active_subgroup = scene.ActiveSubgroup
-        
-        if len(active_subgroup) > 0:
-            ob = bpy.data.objects[active_subgroup]
-        else:
-            ob = bpy.context.active_object
+
+        ob = bpy.context.active_object
             
         if ob and ob.dupli_type == 'GROUP':
             group = ob.dupli_group
             group_name = group.name  # set variable for group toggle
             group_objs = bpy.data.groups[group.name].objects
-            total_groups = 0
 
             row = layout.row()
             row.label(" GROUP: " + group.name, icon = 'GROUP')
-            active_subgroup = scene.ActiveSubgroup
-            if len(active_subgroup) > 0:
-                subgroup = row.operator("powerlib.display_subgroup_content",
-                text="Back to subgroup", icon='BACK')
-                subgroup.item_name = ''
             
             box = layout.box()         
-
-            for elem in group_objs:
-                if elem.dupli_group != None:
-                    row = box.row()   
-                    col=row.row()
-                                     
-                    total_groups += 1
-                    
-                    if (elem.hide == False):
-                        subgroup = col.operator("powerlib.toggle_subgroup",
-                        text="", icon='RESTRICT_VIEW_OFF', emboss=False)
-                        subgroup.display = True
-                        subgroup.item_name = elem.name
-                        subgroup.group_name = group.name
-                        col.label(elem.name)
-                    else:
-                        subgroup = col.operator("powerlib.toggle_subgroup",
-                        text="", icon='RESTRICT_VIEW_ON', emboss=False)
-                        subgroup.display = False
-                        subgroup.item_name = elem.name
-                        subgroup.group_name = group.name
-                        col.label(elem.name)
-                        
-                    if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
-                        subgroup = col.operator("powerlib.display_subgroup_content",
-                        text="", icon='GROUP')
-                        subgroup.item_name = elem.name
-                    else:
-                        col.label(text="")
-                       
-                    resolution = str(elem.dupli_group.name)[-3:]
-                    if resolution in {'_hi', '_lo', '_me'}:
-                        res = resolution[-2:].upper()
-
-                        subgroup = col.operator("powerlib.toggle_subgroup_res",
-                        text=res, icon='FILE_REFRESH')
-                        subgroup.item_name = elem.name
-                        subgroup.group_name = group.name
-                    else:
-                        col.label(text="")
-                else:
-                    pass   
         
-            if total_groups == 0 :
-                box.label(" No subgroups found in this group",icon="LAYER_USED")
-                resolution = str(object.dupli_group.name)[-3:]
-                if resolution in {'_hi', '_lo', '_me'}:
+  
+            resolution = str(ob.dupli_group.name)[-3:]
+            if resolution in {'_hi', '_lo', '_me'}:
 
-                    res = resolution[-2:].upper()
+                res = resolution[-2:].upper()
 
-                    subgroup = box.operator("powerlib.toggle_subgroup_res",
-                    text=res, icon='FILE_REFRESH')
-                    subgroup.item_name = bpy.context.active_object.name
-                    subgroup.group_name = group.name
-            else:
-                row = layout.row(align=True)
-                row.label("Total groups: " + str(total_groups))
-                box = layout.box()
-                row = box.row(align=True)
-                group = row.operator("powerlib.toggle_group",
-                text="Show All", icon='RESTRICT_VIEW_OFF')
-                group.display = "showall"
-                group.group_name = group_name
-    
-                group = row.operator("powerlib.toggle_group",
-                text="Hide All", icon='RESTRICT_VIEW_ON')
-                group.display = "hideall"
-                group.group_name = group_name
-
-                row = box.row()
-                
-                row.label(text="Set all subgroups to: ")
-
-                row = box.row(align=True)
-
-                group = row.operator("powerlib.toggle_group",
-                text="Low", icon='MESH_CIRCLE')
-                group.display = "low"
-                group.group_name = group_name
-                
-                group = row.operator("powerlib.toggle_group",
-                text="Medium", icon='MESH_UVSPHERE')
-                group.display = "medium"
-                group.group_name = group_name
-                
-                group = row.operator("powerlib.toggle_group",
-                text="High", icon='MESH_ICOSPHERE')
-                group.display = "high"
-                group.group_name = group_name
+                subgroup = box.operator("lodtoggle.toggle_subgroup_res",
+                text=res, icon='FILE_REFRESH')
+                subgroup.item_name = bpy.context.active_object.name
+                subgroup.group_name = group.name
                         
         else:
             layout.label(" Select a group")            
 
 
 class ToggleSubgroupResolution(bpy.types.Operator):
-    bl_idname = "powerlib.toggle_subgroup_res"
-    bl_label = "Powerlib Toggle Soubgroup Res"
+    bl_idname = "lodtoggle.toggle_subgroup_res"
+    bl_label = "LodToggle Toggle Soubgroup Res"
     bl_description = "Change the resolution of a subgroup"
     item_name = bpy.props.StringProperty()
     group_name = bpy.props.StringProperty()
@@ -263,100 +177,17 @@ class ToggleSubgroupResolution(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ToggleAllSubgroups(bpy.types.Operator):
-    bl_idname = "powerlib.toggle_group"
-    bl_label = "Powerlib Toggle Group"
-    bl_description = "Toggle a property for all subgroups"
-    display = bpy.props.StringProperty()
-    group_name = bpy.props.StringProperty()
-
-    def execute(self, context):
-
-        display = self.display
-        grp_name = self.group_name
-        group_objs = bpy.data.groups[grp_name].objects
-
-        for elem in group_objs:
-            if display == 'showall':
-                elem.hide = False
-                #break
-                #print("Powerlib: SHOW " + elem.name)
-            elif display == 'hideall':
-                elem.hide= True
-                #break
-            elif display == 'low':
-                #print("Powerlib: ALL LOW " + elem.name)
-                SetProxyResolution(elem,'_lo')
-            elif display == 'medium':
-                #print("Powerlib: ALL MEDIUM " + elem.name)
-                SetProxyResolution(elem,'_me')
-            elif display == 'high':
-                #print("Powerlib: ALL HIGH " + elem.name)
-                SetProxyResolution(elem,'_hi')
-            else:
-                PowerPrint(pcolor.GREEN + "level of detail "
-                "skipped" + pcolor.END)
-
-        return {'FINISHED'}
-    
-    
-class ToggleSubgroupDisplay(bpy.types.Operator):
-    bl_idname = "powerlib.toggle_subgroup"
-    bl_label = "Powelib Toggle Subgroup"
-    bl_description = "Toggle the display of a subgroup"
-    display = bpy.props.BoolProperty()
-    item_name = bpy.props.StringProperty()
-    group_name = bpy.props.StringProperty()
-
-    def execute(self, context):
-
-        display = self.display
-        obj_name = self.item_name
-        grp_name = self.group_name
-        
-        #  only used for printing human readable output in console
-        status = "hidden" if display == True else "visible"
-         
-        PowerPrint(pcolor.GREEN + obj_name + pcolor.ENDC + 
-        " is now " + status)
-            
-
-        bpy.data.groups[grp_name].objects[obj_name].hide = display
-        bpy.data.groups[grp_name].objects[obj_name].hide_render = display
-        return {'FINISHED'}
 
 
-class DisplaySubgroupContent(bpy.types.Operator):
-    bl_idname = "powerlib.display_subgroup_content"
-    bl_label = "Powerlib Display Subgroup Content"
-    bl_description = "Display the content of a subgroup"
-
-    item_name = bpy.props.StringProperty()
-    
-    def execute(self, context):
-        scene = context.scene
-        scene.ActiveSubgroup = self.item_name
-        return {'FINISHED'}
     
 
 def register():
-    bpy.types.Scene.ActiveSubgroup = StringProperty(
-            name="Commit untracked",
-            default="",
-            description="Add untracked files into svn and commit all of them")
-    bpy.utils.register_class(DisplaySubgroupContent)
     bpy.utils.register_class(ToggleSubgroupResolution)
-    bpy.utils.register_class(ToggleAllSubgroups)
-    bpy.utils.register_class(ToggleSubgroupDisplay)
-    bpy.utils.register_class(PowerlibPanel)
+    bpy.utils.register_class(LodTogglePanel)
     
 def unregister():
-    del bpy.types.Scene.ActiveSubgroup
-    bpy.utils.unregister_class(DisplaySubgroupContent)
     bpy.utils.unregister_class(ToggleSubgroupResolution)
-    bpy.utils.unregister_class(ToggleAllSubgroups)
-    bpy.utils.unregister_class(ToggleSubgroupDisplay)
-    bpy.utils.unregister_class(PowerlibPanel)
+    bpy.utils.unregister_class(LodTogglePanel)
     
 if __name__ == "__main__":
     register()
