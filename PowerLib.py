@@ -21,8 +21,8 @@ bl_info = {
     "description": "Control panel for managing "
     "groups contained in linked libraries",
     "author": "Olivier Amrein, Francesco Siddi",
-    "version": (0, 5),
-    "blender": (2, 53, 0),
+    "version": (0, 6),
+    "blender": (2, 64, 9),
     "location": "Properties Panel",
     "warning": "",  # used for warning icon and text in addons panel
     "wiki_url": "",
@@ -119,7 +119,7 @@ class PowerlibPanel(bpy.types.Panel):
             total_groups = 0
 
             row = layout.row()
-            row.label(" GROUP: " + group.name, icon = 'GROUP')
+            row.label(" " + group.name, icon = 'GROUP')
             active_subgroup = scene.ActiveSubgroup
             if len(active_subgroup) > 0:
                 subgroup = row.operator("powerlib.display_subgroup_content",
@@ -182,6 +182,16 @@ class PowerlibPanel(bpy.types.Panel):
                     subgroup.item_name = bpy.context.active_object.name
                     subgroup.group_name = group.name
             else:
+                resolution = str(object.dupli_group.name)[-3:]
+                if resolution in {'_hi', '_lo', '_me'}:
+                
+                    res = resolution[-2:].upper()
+                
+                    subgroup = box.operator("powerlib.toggle_subgroup_res",
+                    text=res, icon='FILE_REFRESH')
+                    subgroup.item_name = bpy.context.active_object.name
+                    subgroup.group_name = group.name
+                
                 row = layout.row(align=True)
                 row.label("Total groups: " + str(total_groups))
                 box = layout.box()
@@ -220,7 +230,7 @@ class PowerlibPanel(bpy.types.Panel):
                 row.operator("powerlib.dump_hide_log", text="", icon='TEXT')
 
         else:
-            layout.label(" Select a group")            
+            layout.label(" Select a group instance")            
 
 
 class ToggleSubgroupResolution(bpy.types.Operator):
