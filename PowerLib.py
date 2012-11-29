@@ -71,7 +71,7 @@ class pcolor:
 def PowerPrint (message):
     print(pcolor.BROWN + "Powerlib: " + pcolor.ENDC + message)
     return
-    
+
 #  Generic function to toggle across 3 different model resolutions
 def SetProxyResolution(elem,target_resolution):
 
@@ -81,7 +81,7 @@ def SetProxyResolution(elem,target_resolution):
        dupgroup_name = obj.dupli_group.name
     except: 
         return
-    
+
     root = dupgroup_name[:-3]
     ext = dupgroup_name[-3:]
     new_group = root + target_resolution
@@ -92,8 +92,8 @@ def SetProxyResolution(elem,target_resolution):
             #print("PowerLib: CHANGE " + str(elem) + " to " + new_group)
         except:
             PowerPrint("Group " + pcolor.GREEN + new_group + pcolor.ENDC + " not found")
-            
-            
+
+
 class PowerlibPanel(bpy.types.Panel):
     bl_label = "Powerlib"
     bl_idname = "SCENE_PT_powerlib"
@@ -106,12 +106,12 @@ class PowerlibPanel(bpy.types.Panel):
         object = bpy.context.active_object
         scene = context.scene
         active_subgroup = scene.ActiveSubgroup
-        
+
         if len(active_subgroup) > 0:
             ob = bpy.data.objects[active_subgroup]
         else:
             ob = bpy.context.active_object
-            
+
         if ob and ob.dupli_type == 'GROUP':
             group = ob.dupli_group
             group_name = group.name  # set variable for group toggle
@@ -125,16 +125,16 @@ class PowerlibPanel(bpy.types.Panel):
                 subgroup = row.operator("powerlib.display_subgroup_content",
                 text="Back to subgroup", icon='BACK')
                 subgroup.item_name = ''
-            
+
             box = layout.box()         
 
             for elem in group_objs:
                 if elem.dupli_group != None:
                     row = box.row()   
                     col=row.row()
-                                     
+
                     total_groups += 1
-                    
+
                     if (elem.hide == False):
                         subgroup = col.operator("powerlib.toggle_subgroup",
                         text="", icon='RESTRICT_VIEW_OFF', emboss=False)
@@ -149,14 +149,14 @@ class PowerlibPanel(bpy.types.Panel):
                         subgroup.item_name = elem.name
                         subgroup.group_name = group.name
                         col.label(elem.name)
-                        
+
                     if len(bpy.data.groups[elem.dupli_group.name].objects.items()) > 1:
                         subgroup = col.operator("powerlib.display_subgroup_content",
-                        text="", icon='GROUP')
+                        text="Explore", icon='GROUP')
                         subgroup.item_name = elem.name
                     else:
                         col.label(text="")
-                       
+
                     resolution = str(elem.dupli_group.name)[-3:]
                     if resolution in {'_hi', '_lo', '_me'}:
                         res = resolution[-2:].upper()
@@ -169,7 +169,7 @@ class PowerlibPanel(bpy.types.Panel):
                         col.label(text="")
                 else:
                     pass   
-        
+
             if total_groups == 0 :
                 box.label(" No subgroups found in this group",icon="LAYER_USED")
                 resolution = str(object.dupli_group.name)[-3:]
@@ -190,14 +190,14 @@ class PowerlibPanel(bpy.types.Panel):
                 text="Show All", icon='RESTRICT_VIEW_OFF')
                 group.display = "showall"
                 group.group_name = group_name
-    
+
                 group = row.operator("powerlib.toggle_group",
                 text="Hide All", icon='RESTRICT_VIEW_ON')
                 group.display = "hideall"
                 group.group_name = group_name
 
                 row = box.row()
-                
+
                 row.label(text="Set all subgroups to: ")
 
                 row = box.row(align=True)
@@ -206,17 +206,19 @@ class PowerlibPanel(bpy.types.Panel):
                 text="Low", icon='MESH_CIRCLE')
                 group.display = "low"
                 group.group_name = group_name
-                
+
                 group = row.operator("powerlib.toggle_group",
                 text="Medium", icon='MESH_UVSPHERE')
                 group.display = "medium"
                 group.group_name = group_name
-                
+
                 group = row.operator("powerlib.toggle_group",
                 text="High", icon='MESH_ICOSPHERE')
                 group.display = "high"
                 group.group_name = group_name
-                        
+
+                row.operator("powerlib.dump_hide_log", text="", icon='TEXT')
+
         else:
             layout.label(" Select a group")            
 
@@ -240,7 +242,7 @@ class ToggleSubgroupResolution(bpy.types.Operator):
 
         root = dupgroup_name[:-2]
         ext = dupgroup_name[-2:]
-        
+
         if (root + 'me') in bpy.data.groups:
             if ext == 'hi':
                 new_group = root + "me"
@@ -311,8 +313,8 @@ class ToggleAllSubgroups(bpy.types.Operator):
                 "skipped" + pcolor.END)
 
         return {'FINISHED'}
-    
-    
+
+
 class ToggleSubgroupDisplay(bpy.types.Operator):
     bl_idname = "powerlib.toggle_subgroup"
     bl_label = "Powelib Toggle Subgroup"
@@ -326,17 +328,21 @@ class ToggleSubgroupDisplay(bpy.types.Operator):
         display = self.display
         obj_name = self.item_name
         grp_name = self.group_name
-        
+
         #  only used for printing human readable output in console
         status = "hidden" if display == True else "visible"
-         
+
         PowerPrint(pcolor.GREEN + obj_name + pcolor.ENDC + 
         " is now " + status)
-            
+
 
         bpy.data.groups[grp_name].objects[obj_name].hide = display
         bpy.data.groups[grp_name].objects[obj_name].hide_render = display
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        _hide_log_handle(self, context, event)
+        return self.execute(context)
 
 
 class DisplaySubgroupContent(bpy.types.Operator):
@@ -345,31 +351,118 @@ class DisplaySubgroupContent(bpy.types.Operator):
     bl_description = "Display the content of a subgroup"
 
     item_name = bpy.props.StringProperty()
-    
+
     def execute(self, context):
         scene = context.scene
         scene.ActiveSubgroup = self.item_name
         return {'FINISHED'}
-    
+
+
+# -----------------------------------------------------------------------------
+# hide log
+
+LIB_HIDE_LOG = set()
+
+LIB_HIDE_TEXT_ID = "blender_hide_objects.py"
+
+LIB_HIDE_TEXT_HEADER = """
+import bpy
+print("running: %r" % __file__)
+def hide(grp_name, obj_name):
+    group = bpy.data.groups.get(grp_name)
+    if group is None:
+        print("hide can't find bpy.data.groups[%r]" % grp_name)
+    else:
+        obj = group.objects.get(obj_name)
+        if obj is None:
+            print("hide can't find bpy.data.groups[%r].objects[%r]" % (grp_name, obj_name))
+        else:
+            obj.hide = obj.hide_render = True
+
+"""
+
+
+def _hide_log_handle(self, context, event):
+    if event.shift:
+        obj_name = self.item_name
+        grp_name = self.group_name
+        key = (grp_name, obj_name)
+        if not self.display:
+            if key in LIB_HIDE_LOG:
+                LIB_HIDE_LOG.remove(key)
+        else:
+            LIB_HIDE_LOG.add(key)
+        print(LIB_HIDE_LOG)
+
+    elif event.ctrl:
+        LIB_HIDE_LOG.clear()
+
+def _dump_hide_log():
+    text = bpy.data.texts.get((LIB_HIDE_TEXT_ID, None))
+    if text is None:
+        text = bpy.data.texts.new(LIB_HIDE_TEXT_ID)
+        text.use_module = True
+        is_new = True
+    else:
+        is_new = False
+
+    if is_new:
+        data = []
+
+        data += LIB_HIDE_TEXT_HEADER.split("\n")
+    else:
+        data = text.as_string().split("\n")
+
+
+    data.append("# ---")
+
+    for grp_name, obj_name in sorted(LIB_HIDE_LOG):
+        line = "hide(%r, %r)" % (grp_name, obj_name)
+        # dont double up
+        if line not in data:
+            data.append(line)
+
+    text.from_string("\n".join(data))
+
+
+class DumpHideLog(bpy.types.Operator):
+    bl_idname = "powerlib.dump_hide_log"
+    bl_label = "Save Hide Log"
+    bl_description = "Write hide log to a file to run on startup"
+
+    item_name = bpy.props.StringProperty()
+
+    def execute(self, context):
+        _dump_hide_log()
+        self.report({'INFO'}, "Written %d items to %r" %
+                    (len(LIB_HIDE_LOG), LIB_HIDE_TEXT_ID))
+        LIB_HIDE_LOG.clear()
+
+        return {'FINISHED'}
+
+# end hide log
+# -----------------------------------------------------------------------------
 
 def register():
     bpy.types.Scene.ActiveSubgroup = StringProperty(
             name="Commit untracked",
             default="",
             description="Add untracked files into svn and commit all of them")
+    bpy.utils.register_class(DumpHideLog)
     bpy.utils.register_class(DisplaySubgroupContent)
     bpy.utils.register_class(ToggleSubgroupResolution)
     bpy.utils.register_class(ToggleAllSubgroups)
     bpy.utils.register_class(ToggleSubgroupDisplay)
     bpy.utils.register_class(PowerlibPanel)
-    
+
 def unregister():
     del bpy.types.Scene.ActiveSubgroup
+    bpy.utils.unregister_class(DumpHideLog)
     bpy.utils.unregister_class(DisplaySubgroupContent)
     bpy.utils.unregister_class(ToggleSubgroupResolution)
     bpy.utils.unregister_class(ToggleAllSubgroups)
     bpy.utils.unregister_class(ToggleSubgroupDisplay)
     bpy.utils.unregister_class(PowerlibPanel)
-    
+
 if __name__ == "__main__":
     register()
