@@ -22,7 +22,7 @@ bl_info = {
     "the cameras available in a scene",
     "author": "Francesco Siddi",
     "version": (0, 5),
-    "blender": (2, 59, 0),
+    "blender": (2, 63, 5),
     "location": "Properties Panel",
     "warning": "",  # used for warning icon and text in addons panel
     "wiki_url": "",
@@ -37,38 +37,15 @@ FloatVectorProperty, StringProperty, EnumProperty)
 scene = bpy.context.scene
 
 cameras = []
-for ob in bpy.data.objects:
-    if ob.type == 'CAMERA':
-        print (ob.name)
-        cameras.append(ob)
 
-
-#  Colors class for terminal terminal output
-class pcolor:
-    BROWN = '\033[90m'
-    PINK = '\033[95m'
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-
-    def disable(self):
-        self.BROWN = ''
-        self.PINK = ''
-        self.BLUE = ''
-        self.GREEN = ''
-        self.YELLOW = ''
-        self.RED = ''
-        self.ENDC = ''
-
-
-#  Function for printing to terminal with LodToggle message at the beginning
-def PowerPrint (message):
-    print(pcolor.BROWN + "LodToggle: " + pcolor.ENDC + message)
-    return
-             
+def ListCameras():
+    for ob in bpy.data.objects:
+        if ob.type == 'CAMERA':
+            print (ob.name)
+            cameras.append(ob)
             
+ListCameras()
+
 class CameraSelectorPanel(bpy.types.Panel):
     bl_label = "Camera Selector"
     bl_idname = "SCENE_PT_cameraselector"
@@ -83,9 +60,8 @@ class CameraSelectorPanel(bpy.types.Panel):
         if len(cameras) > 0:
             for camera in cameras:
                 row = layout.row()
-                row.label(camera.name)
                 btn = row.operator("cameraselector.set_scene_camera", 
-                text="res", icon='FILE_REFRESH')
+                text=camera.name, icon='OUTLINER_DATA_CAMERA')
                 btn.chosen_camera = camera.name
         else:
             layout.label("No cameras in this scene") 
@@ -104,7 +80,6 @@ class SetSceneCamera(bpy.types.Operator):
         try: 
             scene.camera = bpy.data.objects[chosen_camera]
             #print (chosen_camera)
-            #PowerPrint("CHANGE " + str(item_name) + " to " + new_group)
         except:
             #self.report({'WARNING'}, "Group %s not found" % new_group.upper())
             self.report({'WARNING'}, "Fail")
