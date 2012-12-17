@@ -17,7 +17,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    "name": "LodToggle",
+    "name": "Camera Selector",
     "description": "Control panel for activating "
     "the cameras available in a scene",
     "author": "Francesco Siddi",
