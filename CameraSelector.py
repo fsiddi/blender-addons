@@ -36,13 +36,13 @@ FloatVectorProperty, StringProperty, EnumProperty)
 
 scene = bpy.context.scene
 
-cameras = []
+cameras = set()
 
 def ListCameras():
     for ob in bpy.data.objects:
         if ob.type == 'CAMERA':
             print (ob.name)
-            cameras.append(ob)
+            cameras.add(ob)
             
 ListCameras()
 
@@ -66,6 +66,10 @@ class CameraSelectorPanel(bpy.types.Panel):
         else:
             layout.label("No cameras in this scene") 
         
+        row = layout.row()
+        btn = row.operator("cameraselector.reload_camera_list", 
+        text="Reload Camera List", icon='FILE_REFRESH')
+        
 
 class SetSceneCamera(bpy.types.Operator):
     bl_idname = "cameraselector.set_scene_camera"
@@ -87,12 +91,29 @@ class SetSceneCamera(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class ReloadCameraList(bpy.types.Operator):
+    bl_idname = "cameraselector.reload_camera_list"
+    bl_label = "Reload camera list"
+    bl_description = "Refresh camera list for the current scene"
+
+    def execute(self, context):
+
+        try: 
+            ListCameras()
+        except:
+            self.report({'WARNING'}, "Fail, something went wrong")
+
+        return {'FINISHED'}
+
+
 
 def register():
+    bpy.utils.register_class(ReloadCameraList)
     bpy.utils.register_class(SetSceneCamera)
     bpy.utils.register_class(CameraSelectorPanel)
     
 def unregister():
+    bpy.utils.unregister_class(ReloadCameraList)
     bpy.utils.unregister_class(SetSceneCamera)
     bpy.utils.unregister_class(CameraSelectorPanel)
     
