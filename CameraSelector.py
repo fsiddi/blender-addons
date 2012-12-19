@@ -39,6 +39,7 @@ scene = bpy.context.scene
 cameras = set()
 
 def ListCameras():
+    cameras.clear()
     for ob in bpy.data.objects:
         if ob.type == 'CAMERA':
             print (ob.name)
