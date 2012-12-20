@@ -34,8 +34,6 @@ from bpy.props import (FloatProperty, BoolProperty,
 FloatVectorProperty, StringProperty, EnumProperty)
 
 
-scene = bpy.context.scene
-
 cameras = set()
 
 def ListCameras():
@@ -53,6 +51,8 @@ class CameraSelectorPanel(bpy.types.Panel):
     bl_context = "scene"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
+    
+    scene = bpy.context.scene
 
     def draw(self, context):
         layout = self.layout
@@ -77,6 +77,8 @@ class SetSceneCamera(bpy.types.Operator):
     bl_label = "Make this object a camera"
     bl_description = "Make this object a camera"
     chosen_camera = bpy.props.StringProperty()
+    
+    scene = bpy.context.scene
 
     def execute(self, context):
         
