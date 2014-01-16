@@ -61,7 +61,9 @@ class SetSceneCamera(bpy.types.Operator):
     bl_idname = "cameraselector.set_scene_camera"
     bl_label = "Make this object a camera"
     bl_description = "Make this object a camera"
+
     chosen_camera = bpy.props.StringProperty()
+    select_chosen = False
     
     def execute(self, context):
         chosen_camera = bpy.data.objects.get(self.chosen_camera, None)
@@ -70,10 +72,19 @@ class SetSceneCamera(bpy.types.Operator):
             self.report({'ERROR'}, "Camera %s not found.")
             return {'CANCELLED'}
 
+        if self.select_chosen:
+            for o in context.selected_objects:
+                o.select = False
+            chosen_camera.select = True
+            scene.objects.active = chosen_camera
         scene.camera = chosen_camera
+
         return {'FINISHED'}
 
+    def invoke(self, context, event):
+        if event.ctrl: self.select_chosen = True
 
+        return self.execute(context)
 
 
 def register():
