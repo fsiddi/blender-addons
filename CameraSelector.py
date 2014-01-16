@@ -34,17 +34,6 @@ from bpy.props import (FloatProperty, BoolProperty,
 FloatVectorProperty, StringProperty, EnumProperty)
 
 
-cameras = set()
-
-def ListCameras():
-    cameras.clear()
-    for ob in bpy.data.objects:
-        if ob.type == 'CAMERA':
-            print (ob.name)
-            cameras.add(ob)
-            
-ListCameras()
-
 class CameraSelectorPanel(bpy.types.Panel):
     bl_label = "Camera Selector"
     bl_idname = "SCENE_PT_cameraselector"
@@ -52,11 +41,11 @@ class CameraSelectorPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     
-    scene = bpy.context.scene
-
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+
+        cameras = [o for o in scene.objects if o.type == 'CAMERA']
         
         if len(cameras) > 0:
             for camera in cameras:
@@ -66,10 +55,6 @@ class CameraSelectorPanel(bpy.types.Panel):
                 btn.chosen_camera = camera.name
         else:
             layout.label("No cameras in this scene") 
-        
-        row = layout.row()
-        btn = row.operator("cameraselector.reload_camera_list", 
-        text="Reload Camera List", icon='FILE_REFRESH')
         
 
 class SetSceneCamera(bpy.types.Operator):
@@ -94,29 +79,13 @@ class SetSceneCamera(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ReloadCameraList(bpy.types.Operator):
-    bl_idname = "cameraselector.reload_camera_list"
-    bl_label = "Reload camera list"
-    bl_description = "Refresh camera list for the current scene"
-
-    def execute(self, context):
-
-        try: 
-            ListCameras()
-        except:
-            self.report({'WARNING'}, "Fail, something went wrong")
-
-        return {'FINISHED'}
-
 
 
 def register():
-    bpy.utils.register_class(ReloadCameraList)
     bpy.utils.register_class(SetSceneCamera)
     bpy.utils.register_class(CameraSelectorPanel)
     
 def unregister():
-    bpy.utils.unregister_class(ReloadCameraList)
     bpy.utils.unregister_class(SetSceneCamera)
     bpy.utils.unregister_class(CameraSelectorPanel)
     
