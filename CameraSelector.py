@@ -49,9 +49,13 @@ class CameraSelectorPanel(bpy.types.Panel):
         
         if len(cameras) > 0:
             for camera in cameras:
-                row = layout.row()
+                row = layout.row(align=True)
                 btn = row.operator("cameraselector.set_scene_camera", 
                 text=camera.name, icon='OUTLINER_DATA_CAMERA')
+                btn.chosen_camera = camera.name
+
+                btn = row.operator("cameraselector.add_camera_marker", 
+                text='', icon='MARKER')
                 btn.chosen_camera = camera.name
         else:
             layout.label("No cameras in this scene") 
@@ -87,12 +91,57 @@ class SetSceneCamera(bpy.types.Operator):
         return self.execute(context)
 
 
+class AddCameraMarker(bpy.types.Operator):
+    bl_idname = "cameraselector.add_camera_marker"
+    bl_label = "Make this object a camera"
+    bl_description = "Make this object a camera"
+
+    chosen_camera = bpy.props.StringProperty()
+
+    def execute(self, context):
+        chosen_camera = bpy.data.objects.get(self.chosen_camera, None)
+        scene = context.scene
+        if not chosen_camera:
+            self.report({'ERROR'}, "Camera %s not found.")
+            return {'CANCELLED'}
+
+        current_frame = scene.frame_current
+        marker = None
+        for m in reversed(sorted(filter(lambda m: m.frame <= current_frame,
+                                        scene.timeline_markers),
+                                 key = lambda m: m.frame)):
+            marker = m
+            break
+        if marker and (marker.camera == chosen_camera):
+            # Cancel if the last marker at or immediately before
+            # current frame is already bound to the camera.
+            return {'CANCELLED'}
+
+        marker_name = "F_%02d_%s" % (current_frame, self.chosen_camera)
+        if marker and (marker.frame == current_frame):
+            # Reuse existing marker at current frame to avoid
+            # overlapping bound markers.
+            marker.name = marker_name
+        else:
+            marker = scene.timeline_markers.new(marker_name)
+        marker.frame = scene.frame_current
+        marker.camera = chosen_camera
+        marker.select = True
+
+        for other_marker in [m for m in scene.timeline_markers if m != marker]:
+            other_marker.select = False
+
+        return {'FINISHED'}
+
+
 def register():
     bpy.utils.register_class(SetSceneCamera)
+    bpy.utils.register_class(AddCameraMarker)
     bpy.utils.register_class(CameraSelectorPanel)
     
 def unregister():
     bpy.utils.unregister_class(SetSceneCamera)
+    bpy.utils.unregister_class(AddCameraMarker)
     bpy.utils.unregister_class(CameraSelectorPanel)
     
 if __name__ == "__main__":
