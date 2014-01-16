@@ -63,19 +63,14 @@ class SetSceneCamera(bpy.types.Operator):
     bl_description = "Make this object a camera"
     chosen_camera = bpy.props.StringProperty()
     
-    scene = bpy.context.scene
-
     def execute(self, context):
-        
-        chosen_camera = self.chosen_camera
-    
-        try: 
-            scene.camera = bpy.data.objects[chosen_camera]
-            #print (chosen_camera)
-        except:
-            #self.report({'WARNING'}, "Group %s not found" % new_group.upper())
-            self.report({'WARNING'}, "Fail")
+        chosen_camera = bpy.data.objects.get(self.chosen_camera, None)
+        scene = context.scene
+        if not chosen_camera:
+            self.report({'ERROR'}, "Camera %s not found.")
+            return {'CANCELLED'}
 
+        scene.camera = chosen_camera
         return {'FINISHED'}
 
 
