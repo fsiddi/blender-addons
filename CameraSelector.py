@@ -63,8 +63,8 @@ class CameraSelectorPanel(bpy.types.Panel):
 
 class SetSceneCamera(bpy.types.Operator):
     bl_idname = "cameraselector.set_scene_camera"
-    bl_label = "Make this object a camera"
-    bl_description = "Make this object a camera"
+    bl_label = "Set Scene Camera"
+    bl_description = "Set chosen camera as the scene's active camera."
 
     chosen_camera = bpy.props.StringProperty()
     select_chosen = False
@@ -93,8 +93,8 @@ class SetSceneCamera(bpy.types.Operator):
 
 class AddCameraMarker(bpy.types.Operator):
     bl_idname = "cameraselector.add_camera_marker"
-    bl_label = "Make this object a camera"
-    bl_description = "Make this object a camera"
+    bl_label = "Add Camera Marker"
+    bl_description = "Add a timeline marker bound to chosen camera."
 
     chosen_camera = bpy.props.StringProperty()
 
