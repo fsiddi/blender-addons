@@ -45,7 +45,8 @@ class CameraSelectorPanel(bpy.types.Panel):
         layout = self.layout
         scene = context.scene
 
-        cameras = [o for o in scene.objects if o.type == 'CAMERA']
+        cameras = sorted([o for o in scene.objects if o.type == 'CAMERA'],
+                         key = lambda o: o.name)
         
         if len(cameras) > 0:
             for camera in cameras:
