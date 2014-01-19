@@ -80,6 +80,8 @@ class SetSceneCamera(bpy.types.Operator):
         if self.select_chosen:
             for o in context.selected_objects:
                 o.select = False
+            for c in [o for o in scene.objects if o.type == 'CAMERA']:
+                c.hide = (c != chosen_camera)
             chosen_camera.select = True
             scene.objects.active = chosen_camera
         scene.camera = chosen_camera
